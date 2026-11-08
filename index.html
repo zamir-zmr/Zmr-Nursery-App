@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#d71c1c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nursery App</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#00bcd4;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#ashSplash{z-index:2;position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(160deg,#00bcd4,#0097a7 60%,#006978);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;transition:opacity .6s}
+#ashSplash.hide{opacity:0;pointer-events:none}
+.ash-stage{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+.ash-ring{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:50%;border:3px solid rgba(255,255,255,.75);animation:ring 2.4s ease-out infinite}
+.ash-ring.r2{animation-delay:1.2s;border-color:rgba(255,235,0,.8)}
+@keyframes ring{0%{transform:scale(.45);opacity:1}100%{transform:scale(1.15);opacity:0}}
+.ash-logo{width:110px;height:110px;border-radius:26px;box-shadow:0 8px 28px rgba(0,0,0,.35);animation:pop 1s cubic-bezier(.2,1.6,.4,1) both,float 2.6s ease-in-out 1s infinite;position:relative}
+@keyframes pop{0%{transform:scale(0) rotate(-25deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ash-name{font-size:28px;font-weight:800;letter-spacing:3px;animation:fade 1s .5s both,glow 2.4s 1.5s ease-in-out infinite}
+.ash-sub{font-size:14px;letter-spacing:2px;opacity:.9;animation:fade 1s .9s both}
+@keyframes fade{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+@keyframes glow{0%,100%{text-shadow:0 0 0 rgba(255,235,0,0)}50%{text-shadow:0 0 18px rgba(255,235,0,.9)}}
+.ash-bar{position:relative;width:150px;height:5px;border-radius:5px;background:rgba(255,255,255,.3);overflow:hidden}
+.ash-bar i{position:absolute;top:0;bottom:0;width:45%;border-radius:5px;background:linear-gradient(90deg,#ffeb00,#fff);animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{left:-45%}100%{left:100%}}
+.ash-bar.stop{background:#EF4444}.ash-bar.stop i{display:none}
+.fl{position:absolute;font-size:34px;opacity:0;animation:up 5s linear infinite}
+@keyframes up{0%{transform:translateY(40px) rotate(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+#appFrame{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;width:100%;height:100%;border:0;background:#00bcd4}
+#msg{position:relative;min-height:20px;font-size:14px;color:#fff;max-width:320px;line-height:1.5}
+#msg code{color:#ffeb00}
+#actions{position:relative;display:none;gap:10px}
+#actions button{border:0;border-radius:12px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;color:#222;background:linear-gradient(90deg,#fff,#ffeb00)}
+#actions button.alt{background:rgba(0,0,0,.3);color:#fff}
+</style>
+</head>
+<body>
+<div id="ashSplash">
+  <span class="fl" style="left:8%;animation-delay:0s">🍎</span><span class="fl" style="left:25%;animation-delay:1.2s">🔤</span><span class="fl" style="left:45%;animation-delay:2.4s">🐘</span><span class="fl" style="left:65%;animation-delay:.6s">🎨</span><span class="fl" style="left:82%;animation-delay:1.8s">🔢</span><span class="fl" style="left:35%;animation-delay:3.2s">🦜</span>
+  <div class="ash-stage"><i class="ash-ring"></i><i class="ash-ring r2"></i><img class="ash-logo" src="icon-192.png" alt="Nursery" width="110" height="110"></div>
+  <div class="ash-name">NURSERY APP</div>
+  <div class="ash-sub">LEARN · PLAY · GROW</div>
+  <div class="ash-bar" id="bar"><i></i></div>
+  <div id="msg"></div>
+  <div id="actions"><button id="retryBtn">Retry</button><button id="cachedBtn" class="alt" style="display:none">Open last link</button></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+<script>
+/* ===== Nursery App - Redirect (iframe / WebView) =====
+   Firebase Realtime Database path:  redirect_link
+     redirect_link/url      -> "https://your-link"   (the page this app opens)
+     redirect_link/fallback -> "https://backup-link" (optional; opened if url is unreachable)
+     redirect_link/enabled  -> true / false          (optional; false = show message instead)
+     redirect_link/message  -> "text"                (optional; shown when enabled is false)
+   (redirect_link can also be a plain string URL. Missing nodes are auto-created on first open.)
+   If url is empty, the bundled Nursery App (nursery.html) opens.   Debug: /?stay=1 */
+const FB_CONFIG = {
+  apiKey: "AIzaSyCr1DsKYO2KR6rHLHRfSaMvqJYfCaagDvI",
+  authDomain: "nursery-app-28b8c.firebaseapp.com",
+  databaseURL: "https://nursery-app-28b8c-default-rtdb.firebaseio.com",
+  projectId: "nursery-app-28b8c",
+  storageBucket: "nursery-app-28b8c.firebasestorage.app",
+  messagingSenderId: "280394769172",
+  appId: "1:280394769172:web:e417a6f10de9b98c229801",
+  measurementId: "G-WG7C417437"
+};
+const DB_PATH = 'redirect_link', LS_KEY = 'nursery_redirect_link_v1', BUNDLED = 'nursery.html', MIN_SPLASH = 2200, TIMEOUT = 6000;
+const $ = id => document.getElementById(id);
+const stay = new URLSearchParams(location.search).has('stay');
+let started = Date.now(), done = false;
+
+function say(html, err){ $('msg').innerHTML = html || ''; $('msg').style.visibility = err ? 'visible' : 'hidden'; $('bar').classList.toggle('stop', !!err); }
+function showActions(cached){ $('actions').style.display = 'flex'; $('cachedBtn').style.display = cached ? '' : 'none'; $('cachedBtn').onclick = () => go(cached); }
+
+function safeUrl(u){
+  if (typeof u !== 'string') return null;
+  u = u.trim(); if (!u) return null;
+  try{
+    const x = new URL(u, location.href);
+    if (!/^https?:$/.test(x.protocol)) return null;
+    if (x.origin === location.origin && x.pathname === location.pathname && !x.search && !x.hash) return null;
+    return x.href;
+  }catch(e){ return null; }
+}
+function cached(){ try{ return safeUrl(localStorage.getItem(LS_KEY)); }catch(e){ return null; } }
+function save(u){ try{ localStorage.setItem(LS_KEY, u); }catch(e){} }
+
+let mounted = false, curUrl = null;
+function hideSplash(){ const w = Math.max(0, MIN_SPLASH - (Date.now() - started)); setTimeout(() => $('ashSplash').classList.add('hide'), w); }
+function mount(url){
+  curUrl = url; mounted = true;
+  let f = $('appFrame');
+  if (!f){
+    f = document.createElement('iframe'); f.id = 'appFrame'; f.title = 'Nursery App';
+    f.setAttribute('allow', 'camera *; microphone *; fullscreen *; geolocation *; clipboard-write *; autoplay *');
+    f.setAttribute('allowfullscreen', '');
+    f.onload = hideSplash; document.body.appendChild(f); setTimeout(hideSplash, 10000);
+  }
+  if (f.src !== url) f.src = url;
+}
+function unmount(){ const f = $('appFrame'); if (f) f.remove(); mounted = false; curUrl = null; done = false; started = Date.now(); $('ashSplash').classList.remove('hide'); }
+function go(url){
+  done = true;
+  if (stay){ say('Link: <code>' + url.replace(/</g,'&lt;') + '</code><br>(stay mode)', true); return; }
+  if (mounted && url === curUrl) return;
+  mount(url);
+}
+
+let ref = null, ensured = false;
+const DEFAULTS = { url: '', fallback: '', enabled: true, message: 'This app is temporarily unavailable.' };
+
+function ensureNodes(v){
+  if (ensured || typeof v === 'string') return; ensured = true;
+  const o = (v && typeof v === 'object') ? v : {};
+  Object.keys(DEFAULTS).forEach(k => { if (o[k] === undefined || o[k] === null) ref.child(k).set(DEFAULTS[k]).catch(() => {}); });
+}
+
+function handle(val){
+  ensureNodes(val);
+  const o = (val && typeof val === 'object') ? val : { url: val };
+  if (o.enabled === false){ if (mounted) unmount(); say(String(o.message || DEFAULTS.message).replace(/</g,'&lt;'), true); $('actions').style.display = 'none'; return; }
+  say('');
+  const u = safeUrl(o.url) || safeUrl(BUNDLED);
+  if (safeUrl(o.url)) save(u);
+  const f = safeUrl(o.fallback);
+  if (!f || f === u){ go(u); return; }
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4500);
+  fetch(u, { mode: 'no-cors', cache: 'no-store', signal: ctl.signal })
+    .then(() => { clearTimeout(t); go(u); })
+    .catch(() => { clearTimeout(t); go(f); });
+}
+
+function load(){
+  done = false; started = Date.now(); $('actions').style.display = 'none'; say('');
+  let first = true;
+  const timer = setTimeout(() => {
+    if (!first) return; first = false;
+    go(cached() || safeUrl(BUNDLED));
+  }, TIMEOUT);
+  try{
+    if (!firebase.apps.length){ firebase.initializeApp(FB_CONFIG); try{ firebase.analytics(); }catch(e){} }
+    if (ref) ref.off();
+    ref = firebase.database().ref(DB_PATH);
+    ref.on('value', s => {
+      if (first){ first = false; clearTimeout(timer); }
+      handle(s.val());
+    }, err => {
+      if (first){ first = false; clearTimeout(timer); }
+      if (done) return;
+      go(cached() || safeUrl(BUNDLED));
+    });
+  }catch(e){ first = false; clearTimeout(timer); go(cached() || safeUrl(BUNDLED)); }
+}
+
+$('retryBtn').onclick = load;
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+if (window.firebase) load(); else go(cached() || safeUrl(BUNDLED));
+</script>
+</body>
+</html>

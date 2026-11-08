@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Nursery App</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:Roboto,Arial,sans-serif;background:#00bcd4;overflow:hidden}
+#bar{height:56px;background:#d71c1c;color:#fff;display:flex;align-items:center;font-size:21px;font-weight:bold;padding:0 14px;gap:22px}
+#bar span{font-size:28px}#ttl{flex:1;white-space:nowrap;overflow:hidden}
+#lg{font-size:16px!important;border:2px solid #fff;border-radius:16px;padding:4px 10px}
+#main{height:calc(100% - 56px);overflow-y:auto;padding:10px 10px 80px;-webkit-overflow-scrolling:touch}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{position:relative;background:#fff;border-radius:22px;cursor:pointer;transition:transform .15s;overflow:hidden}
+.card:before{content:"";display:block;padding-top:100%}
+.in{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px;text-align:center}
+.pic{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:17vw;line-height:1;white-space:nowrap;max-width:100%}
+.pic.s{font-size:10vw}.pic b{font-size:15vw}
+.sw{width:26vw;height:26vw;border-radius:18px;border:1px solid #ccc}
+.t{font-size:4.6vw;font-weight:bold;line-height:1.15;min-height:2.4em;display:flex;flex-direction:column;justify-content:center}
+.t i{font-style:normal;font-size:3.4vw;color:#666;font-weight:normal}
+.pop{transform:scale(1.1)}
+.row{border-radius:30px;color:#fff;font-size:26px;font-weight:bold;padding:10px 16px;margin:8px 0;text-align:center;display:flex;justify-content:space-between;align-items:center;min-height:58px}
+.row b{background:#5cb81a;border-radius:50%;width:48px;height:48px;line-height:48px;font-size:22px}
+.pill{background:#fff;border-radius:30px;text-align:center;font-size:28px;font-weight:bold;padding:6px;margin:0 auto 8px;width:60%}
+.btn{border:0;border-radius:24px;padding:12px 22px;font-size:20px;font-weight:bold;color:#fff;background:#e53935;margin:4px}
+#ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;z-index:5}
+#dr{position:fixed;top:0;bottom:0;left:-80%;width:75%;max-width:340px;background:#fafafa;z-index:6;transition:left .25s;overflow-y:auto}
+#dr.o{left:0}
+#dh{height:190px;background:linear-gradient(#ffd9d6,#10ad2e);padding:16px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}
+#dh .l{font-size:56px;background:#fff;border-radius:16px;width:80px;height:80px;text-align:center;margin-bottom:8px}
+.mi{padding:17px 20px;font-size:19px;display:flex;gap:26px}.mi:active{background:#ddd}
+.sheet{background:#fffbe6;border-radius:16px;padding:10px;text-align:center;font-size:32px;font-weight:bold}.sheet div{padding:4px}
+canvas{background:#fff;border-radius:16px;width:100%;touch-action:none}
+.dot{display:inline-block;width:38px;height:38px;border-radius:50%;margin:4px;border:3px solid #fff}
+.opt{display:block;width:100%;border:0;border-radius:14px;color:#fff;font-size:28px;font-weight:bold;padding:14px;margin:9px 0}
+.pol{background:#fff;border-radius:16px;padding:14px;font-size:15px;line-height:1.5}.pol h2{margin-top:0}.pol h3{margin:14px 0 4px}
+</style></head><body>
+<div id="bar"><span onclick="drawer(1)">&#9776;</span><div id="ttl"></div><span id="lg" onclick="toggleLang()"></span></div>
+<div id="main"></div><div id="ov" onclick="drawer(0)"></div>
+<div id="dr"><div id="dh"><div class="l">🍎</div><div style="font-size:26px;font-weight:bold" id="dt"></div><div id="dl"></div></div>
+<div class="mi" onclick="menu('home')">🏠 Home</div><div class="mi" onclick="menu('lang')">🌐 English / हिंदी</div><div class="mi" onclick="menu('update')">⬇️ Update</div>
+<div class="mi" onclick="menu('share')">🔗 Share</div><div class="mi" onclick="menu('rate')">👍 Rate</div>
+<div class="mi" onclick="menu('other')">⬇️ Other App</div><div class="mi" onclick="menu('privacy')" style="color:#6200ea;font-weight:bold">📖 Privacy Policy</div>
+<div class="mi">ℹ️ <span id="ver"></span></div></div>
+<script>
+// ===== CONFIG: yahan se title / version / links badlein =====
+const CFG={title:"Nursery App",version:"1.0.9.0",
+ playLink:"https://play.google.com/store/apps/details?id=YOUR.PACKAGE.NAME",
+ devLink:"https://play.google.com/store/apps/developer?id=YOUR_NAME"};
+const POLICY=`<h2>Privacy Policy – Nursery App</h2>
+<p><b>ZmrAppStudio</b> · Effective date: November 8, 2026</p>
+<p>ZmrAppStudio built the Nursery App as a free app for children. This service is provided at no cost and is intended for use as is. This page explains how information is handled when you use the app. By using the app you agree to this policy.</p>
+<h3>Information Collection and Use</h3>
+<p>Nursery App <b>does not collect, store, transmit, sell or share any personal information</b>. There is no sign-up or login, and the app asks for no personal details. The app works offline. Your language choice (English or Hindi) is saved only on your own device and is never sent to us.</p>
+<h3>Sound / Text-to-Speech</h3>
+<p>The app speaks words using the text-to-speech engine already installed on your device. We do not record, collect or store any audio or voice data.</p>
+<h3>Advertising and Analytics</h3>
+<p>The app does not show ads and does not use analytics or tracking tools. If this changes in a future update, this policy will be updated first and ads will only come from Google Play Families-compliant sources.</p>
+<h3>Third-Party Services</h3>
+<p>The app is distributed through Google Play. Google may collect standard store and device information under its own policy: <a href="https://policies.google.com/privacy">policies.google.com/privacy</a>.</p>
+<h3>Cookies</h3>
+<p>The app does not use cookies.</p>
+<h3>Children’s Privacy</h3>
+<p>This app is designed for young children, including children under 13. We do not knowingly collect any personal information from children or from anyone else. We do not share, sell, rent or transfer children’s personal information. Parents and guardians stay in control. If you believe a child has given us personal information, contact us and we will take the necessary action.</p>
+<h3>Security</h3>
+<p>Because the app does not collect your data, there is nothing stored on our side. We still work to keep the app safe, but no method of electronic storage or transmission is 100% secure.</p>
+<h3>Links to Other Sites</h3>
+<p>The menu options Update, Rate, Share and Other App open Google Play or other external pages. We do not control those sites and advise you to read their privacy policies.</p>
+<h3>Changes to This Privacy Policy</h3>
+<p>We may update this policy from time to time. Changes will be posted on this page, and the effective date above will be updated.</p>
+<h3>Contact Us</h3>
+<p>If you have any questions or suggestions, contact us at <a href="mailto:zmrappstudio634@gmail.com">zmrappstudio634@gmail.com</a>.</p>
+`;
+let HI=false;try{HI=localStorage.getItem('lang')=='hi'}catch(e){}
+document.getElementById('ver').textContent=CFG.version;document.getElementById('dt').textContent=CFG.title;
+const $=id=>document.getElementById(id);
+
+// ===== SOUND (instant) =====
+let ctx,voices=[],S=window.speechSynthesis,warm=0,tm;
+function loadV(){try{voices=S.getVoices()}catch(e){}}
+if(S){loadV();S.onvoiceschanged=loadV}
+function pick(l){return voices.find(v=>v.lang.replace('_','-')==l)||voices.find(v=>v.lang.slice(0,2)==l.slice(0,2))}
+function beep(f){try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();if(ctx.state=='suspended')ctx.resume();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=f||650;o.connect(g);g.connect(ctx.destination);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.2);o.start();o.stop(ctx.currentTime+.2)}catch(e){}}
+function warmup(){if(warm||!S)return;warm=1;loadV();beep(1);try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;S.speak(u)}catch(e){}}
+['pointerdown','touchstart','mousedown'].forEach(e=>document.addEventListener(e,warmup,{passive:true,capture:true}));
+document.addEventListener('visibilitychange',()=>{if(S)S.cancel();loadV()});
+function say(segs){beep(700);
+ if(window.AppInventor&&AppInventor.setWebViewString){const g=segs[segs.length-1];AppInventor.setWebViewString("speak:"+g[1]+"|"+segs.map(s=>s[0]).join(". "));return}
+ if(!S)return;clearTimeout(tm);S.cancel();if(S.paused)S.resume();
+ tm=setTimeout(()=>segs.forEach(([t,l])=>{const u=new SpeechSynthesisUtterance(t);u.lang=l;const v=pick(l);if(v)u.voice=v;u.rate=.85;u.pitch=1.15;S.speak(u)}),40)}
+const EN=t=>[[t,'en-US']],HN=t=>[[t,'hi-IN']],sp=(e,h)=>HI?HN(h):EN(e);
+function pop(el){el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),200)}
+
+// ===== DATA  (English|Hindi|Emoji) =====
+const L={
+Fruits:"Apple|सेब|🍎;Banana|केला|🍌;Mango|आम|🥭;Orange|संतरा|🍊;Grapes|अंगूर|🍇;Watermelon|तरबूज़|🍉;Strawberry|स्ट्रॉबेरी|🍓;Pineapple|अनानास|🍍;Cherry|चेरी|🍒;Peach|आड़ू|🍑;Pear|नाशपाती|🍐;Lemon|नींबू|🍋;Coconut|नारियल|🥥;Kiwi|कीवी|🥝;Blueberries|ब्लूबेरी|🫐;Melon|खरबूजा|🍈",
+Vegetables:"Tomato|टमाटर|🍅;Potato|आलू|🥔;Carrot|गाजर|🥕;Onion|प्याज़|🧅;Garlic|लहसुन|🧄;Brinjal|बैंगन|🍆;Corn|मक्का|🌽;Cucumber|खीरा|🥒;Broccoli|ब्रोकली|🥦;Chili|मिर्च|🌶️;Peas|मटर|🫛;Mushroom|मशरूम|🍄;Cabbage|पत्तागोभी|🥬",
+Animals:"Lion|शेर|🦁;Cat|बिल्ली|🐱;Dog|कुत्ता|🐶;Elephant|हाथी|🐘;Horse|घोड़ा|🐴;Cow|गाय|🐄;Monkey|बंदर|🐒;Tiger|बाघ|🐯;Zebra|ज़ेबरा|🦓;Rabbit|खरगोश|🐰;Goat|बकरी|🐐;Sheep|भेड़|🐑;Camel|ऊँट|🐪;Giraffe|जिराफ़|🦒;Bear|भालू|🐻;Dinosaur|डायनासोर|🦖;Kangaroo|कंगारू|🦘;Pig|सूअर|🐷",
+Insects:"Bee|मधुमक्खी|🐝;Ant|चींटी|🐜;Butterfly|तितली|🦋;Ladybug|लेडीबग|🐞;Spider|मकड़ी|🕷️;Snail|घोंघा|🐌;Cockroach|कॉकरोच|🪳;Mosquito|मच्छर|🦟;Fly|मक्खी|🪰;Scorpion|बिच्छू|🦂;Worm|कीड़ा|🐛;Cricket|झींगुर|🦗;Lizard|छिपकली|🦎;Snake|साँप|🐍",
+Birds:"Parrot|तोता|🦜;Eagle|चील|🦅;Owl|उल्लू|🦉;Duck|बत्तख|🦆;Rooster|मुर्गा|🐓;Peacock|मोर|🦚;Penguin|पेंगुइन|🐧;Swan|हंस|🦢;Flamingo|फ्लेमिंगो|🦩;Dove|कबूतर|🕊️;Chick|चूज़ा|🐤;Crow|कौआ|🐦‍⬛;Turkey|टर्की|🦃",
+Vehicles:"Car|कार|🚗;Bus|बस|🚌;Train|रेलगाड़ी|🚆;Aeroplane|हवाई जहाज़|✈️;Ship|जहाज़|🚢;Bicycle|साइकिल|🚲;Motorbike|मोटरसाइकिल|🏍️;Truck|ट्रक|🚚;Helicopter|हेलीकॉप्टर|🚁;Rocket|रॉकेट|🚀;Tractor|ट्रैक्टर|🚜;Ambulance|एम्बुलेंस|🚑;Boat|नाव|⛵;Auto|ऑटो रिक्शा|🛺",
+"Body Parts":"Eye|आँख|👁️;Ear|कान|👂;Nose|नाक|👃;Mouth|मुँह|👄;Tongue|जीभ|👅;Hand|हाथ|✋;Foot|पैर|🦶;Leg|टाँग|🦵;Arm|बाँह|💪;Tooth|दाँत|🦷;Brain|दिमाग़|🧠;Heart|दिल|❤️",
+"Sea Animals":"Fish|मछली|🐟;Whale|व्हेल|🐳;Dolphin|डॉल्फ़िन|🐬;Shark|शार्क|🦈;Octopus|ऑक्टोपस|🐙;Crab|केकड़ा|🦀;Turtle|कछुआ|🐢;Squid|स्क्विड|🦑;Shrimp|झींगा|🦐;Seal|सील|🦭",
+Shapes:"Circle|गोला|⭕;Square|वर्ग|🟩;Triangle|त्रिकोण|🔺;Star|तारा|⭐;Heart|दिल|❤️;Diamond|हीरा|🔷;Rectangle|आयत|▬;Oval|अंडाकार|🥚;Moon|चाँद|🌙",
+Colors:"Red|लाल|#f00;White|सफ़ेद|#fff;Black|काला|#000;Green|हरा|#008000;Orange|नारंगी|#ffa500;Pink|गुलाबी|#ffc0cb;Purple|बैंगनी|#800080;Yellow|पीला|#ff0;Blue|नीला|#00f;Brown|भूरा|#8b4513;Grey|स्लेटी|#808080",
+"Solar Systems":"Sun|सूर्य|🌞;Mercury|बुध|⚪;Venus|शुक्र|🟡;Earth|पृथ्वी|🌍;Mars|मंगल|🔴;Jupiter|बृहस्पति|🟠;Saturn|शनि|🪐;Uranus|अरुण|🔵;Neptune|वरुण|🔷;Pluto|प्लूटो|⚫;Moon|चाँद|🌙",
+"Flags and Continents":"India|भारत|🇮🇳;Pakistan|पाकिस्तान|🇵🇰;Oman|ओमान|🇴🇲;UAE|यूएई|🇦🇪;Saudi Arabia|सऊदी अरब|🇸🇦;Kuwait|कुवैत|🇰🇼;Bangladesh|बांग्लादेश|🇧🇩;Philippines|फ़िलीपींस|🇵🇭;America|अमेरिका|🇺🇸;China|चीन|🇨🇳;Asia|एशिया|🌏;Africa|अफ्रीका|🌍;Europe|यूरोप|🌍;North America|उत्तरी अमेरिका|🌎;South America|दक्षिण अमेरिका|🌎;Australia|ऑस्ट्रेलिया|🦘;Antarctica|अंटार्कटिका|🧊"};
+const AL="A|Apple|सेब|🍎;B|Ball|गेंद|⚽;C|Cat|बिल्ली|🐱;D|Dog|कुत्ता|🐶;E|Elephant|हाथी|🐘;F|Fish|मछली|🐟;G|Grapes|अंगूर|🍇;H|Horse|घोड़ा|🐴;I|Ice cream|आइसक्रीम|🍦;J|Joker|जोकर|🤡;K|Kite|पतंग|🪁;L|Lion|शेर|🦁;M|Monkey|बंदर|🐵;N|Nest|घोंसला|🪺;O|Orange|संतरा|🍊;P|Parrot|तोता|🦜;Q|Queen|रानी|👸;R|Rabbit|खरगोश|🐰;S|Sun|सूरज|☀️;T|Tiger|बाघ|🐯;U|Umbrella|छाता|☂️;V|Van|वैन|🚐;W|Watch|घड़ी|⌚;X|X-ray|एक्स-रे|🩻;Y|Yak|याक|🐂;Z|Zebra|ज़ेबरा|🦓";
+const VM="अ|अनार|Anaar|🍎;आ|आम|Aam|🥭;इ|इमली|Imli|🫘;उ|उल्लू|Ullu|🦉;ऊ|ऊँट|Oont|🐪;ए|एक|Ek|1️⃣;क|कबूतर|Kabootar|🕊️;ख|खरगोश|Khargosh|🐰;ग|गमला|Gamla|🪴;घ|घड़ी|Ghadi|⌚;च|चम्मच|Chammach|🥄;छ|छतरी|Chhatri|☂️;ज|जहाज़|Jahaaz|🚢;झ|झंडा|Jhanda|🚩;ट|टमाटर|Tamatar|🍅;त|तरबूज़|Tarbooz|🍉;ध|धनुष|Dhanush|🏹;न|नल|Nal|🚰;प|पतंग|Patang|🪁;ब|बत्तख|Batakh|🦆;भ|भालू|Bhaalu|🐻;म|मछली|Machhli|🐟;व|वायुयान|Vayuyan|✈️;श|शेर|Sher|🦁;स|सेब|Seb|🍎;ह|हाथी|Haathi|🐘";
+const W="Zero One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen Twenty".split(" ");
+const H="शून्य एक दो तीन चार पाँच छह सात आठ नौ दस ग्यारह बारह तेरह चौदह पंद्रह सोलह सत्रह अठारह उन्नीस बीस".split(" ");
+const DAYS="Sunday रविवार,Monday सोमवार,Tuesday मंगलवार,Wednesday बुधवार,Thursday गुरुवार,Friday शुक्रवार,Saturday शनिवार".split(",");
+const MON="January जनवरी 31,February फ़रवरी 28,March मार्च 31,April अप्रैल 30,May मई 31,June जून 30,July जुलाई 31,August अगस्त 31,September सितंबर 30,October अक्टूबर 31,November नवंबर 30,December दिसंबर 31".split(",");
+const COL=["#f00","#e5007d","#505050","#00f","#800080","#00b400","#c9c91a","#00bb90","#508780","#f44336","#ff9800"];
+const HOME=[["Alphabets","वर्णमाला","🅰️🍎"],["Hindi Varnmala","हिंदी वर्णमाला","अ आ"],["Numbers","गिनती","🔢"],["Drawing","चित्रकारी","🎨"],["Fruits","फल","🍎🍌"],["Vegetables","सब्ज़ियाँ","🥕🍅"],["Animals","जानवर","🦁🐘"],["Insects","कीड़े-मकोड़े","🐝🦋"],["Birds","पक्षी","🦜🦆"],["Sea Animals","समुद्री जीव","🐬🐙"],["Vehicles","वाहन","🚗✈️"],["Body Parts","शरीर के अंग","👁️👂"],["Shapes","आकृतियाँ","🔺⭐"],["Colors","रंग","🌈"],["Multiplication Numbers","पहाड़े","✖️"],["Days","दिन","📅"],["Month","महीने","🗓️"],["Solar Systems","सौर मंडल","🪐"],["Flags and Continents","देश और महाद्वीप","🏳️🌍"],["Test","परीक्षा","📝"]];
+const TT={};HOME.forEach(h=>TT[h[0]]=h[1]);
+
+// ===== VIEWS =====
+const M=$('main');let cur='home';
+function go(n){location.hash=encodeURIComponent(n)}
+window.onhashchange=()=>show(decodeURIComponent(location.hash.slice(1))||'home');
+function card(pic,en,hi,segs,cls){const d=document.createElement('div');d.className='card';
+ const a=HI?hi:en,b=HI?en:hi;
+ d.innerHTML=`<div class="in"><div class="pic ${cls||''}">${pic}</div><div class="t">${a}${b&&b!=a?`<i>${b}</i>`:''}</div></div>`;
+ d.onclick=()=>{pop(d);segs&&say(segs)};return d}
+function grid(a){M.innerHTML='<div class="grid"></div>';a.forEach(x=>M.firstChild.appendChild(x))}
+function items(k){return L[k].split(';').map(s=>s.split('|'))}
+function show(v){cur=v;if(S)S.cancel();$('ttl').textContent=v=='home'?CFG.title:(HI&&TT[v]||v);$('lg').textContent=HI?'EN':'हिं';M.scrollTop=0;
+ if(v=='home')return grid(HOME.map(([n,h,e])=>{const c=card(e,n,h,null,e.length>3?'s':'');c.onclick=()=>{beep(800);go(n)};return c}));
+ if(v=='Numbers')return grid(W.slice(1).map((w,i)=>card(`<b style="color:#c00;font-size:22vw">${i+1}</b>`,w,H[i+1],sp(`${i+1}. ${w}`,H[i+1]))));
+ if(v=='Alphabets')return grid(AL.split(';').map(s=>{const[a,w,h,e]=s.split('|');return card(`<b>${a}</b>${e}`,w,h,HI?[[`${a} for ${w}`,'en-US'],[h,'hi-IN']]:EN(`${a} for ${w}`))}));
+ if(v=='Hindi Varnmala')return grid(VM.split(';').map(s=>{const[a,w,t,e]=s.split('|');return card(`<b>${a}</b>${e}`,w,t,HN(`${a} से ${w}`))}));
+ if(v=='Colors')return grid(items(v).map(([e,h,c])=>card(`<div class="sw" style="background:${c}"></div>`,e,h,sp(e,h))));
+ if(L[v])return grid(items(v).map(([e,h,p])=>card(p,e,h,sp(e,h),p.length>6?'s':'')));
+ if(v=='Days'){M.innerHTML='<div class="pill">'+(HI?'दिन':'Days')+'</div>';DAYS.forEach((s,i)=>{const[e,h]=s.split(' ');row(HI?h:e,COL[i],null,sp(e,h))});return}
+ if(v=='Month'){M.innerHTML='<div class="pill">'+(HI?'महीने':'Months')+'</div>';MON.forEach((s,i)=>{const[e,h,d]=s.split(' ');row(HI?h:e,COL[i%COL.length],d,sp(`${e} has ${d} days`,`${h} में ${d} दिन होते हैं`))});return}
+ if(v=='Multiplication Numbers')return table(1);
+ if(v=='Drawing')return draw();
+ if(v=='Test')return levels();
+ if(v=='Privacy Policy'){M.innerHTML='<div class="pol">'+POLICY+'</div>'}}
+function row(t,c,n,segs){const r=document.createElement('div');r.className='row';r.style.background=c;r.innerHTML=`<span style="flex:1">${t}</span>`+(n?`<b>${n}</b>`:'');r.onclick=()=>{pop(r);say(segs)};M.appendChild(r)}
+function table(n){n=Math.max(1,Math.min(20,n));M.innerHTML=`<div style="text-align:center"><button class="btn" onclick="table(1)">RESET</button><button class="btn" onclick="table(${n-1})">-</button><button class="btn" style="background:#2e9e3e" onclick="table(${n+1})">+</button></div><div class="pill" style="color:red;width:40%">${n}</div><div class="sheet"></div>`;
+ const s=M.querySelector('.sheet');for(let i=1;i<=10;i++){const d=document.createElement('div');d.textContent=`${n} x ${i} = ${n*i}`;d.onclick=()=>{pop(d);say(sp(`${n} times ${i} is ${n*i}`,`${n} गुणा ${i} बराबर ${n*i}`))};s.appendChild(d)}}
+function draw(){M.innerHTML='<div id="pal"></div><canvas id="cv"></canvas><div style="text-align:center"><button class="btn" id="clr">Clear</button></div>';
+ const cv=$('cv'),c=cv.getContext('2d');cv.width=cv.offsetWidth;cv.height=Math.round(innerHeight*.55);cv.style.height=cv.height+'px';
+ let col='#f00',dn=0;[["#f00","Red","लाल"],["#00f","Blue","नीला"],["#0a0","Green","हरा"],["#ff0","Yellow","पीला"],["#ffa500","Orange","नारंगी"],["#800080","Purple","बैंगनी"],["#ff69b4","Pink","गुलाबी"],["#8b4513","Brown","भूरा"],["#000","Black","काला"]].forEach(([k,e,h])=>{const d=document.createElement('span');d.className='dot';d.style.background=k;d.onclick=()=>{col=k;say(sp(e,h))};$('pal').appendChild(d)});
+ const p=e=>{const r=cv.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return[t.clientX-r.left,t.clientY-r.top]};
+ const st=e=>{dn=1;const[x,y]=p(e);c.beginPath();c.moveTo(x,y);e.preventDefault()},mv=e=>{if(!dn)return;const[x,y]=p(e);c.strokeStyle=col;c.lineWidth=8;c.lineCap='round';c.lineTo(x,y);c.stroke();e.preventDefault()};
+ cv.ontouchstart=st;cv.ontouchmove=mv;cv.ontouchend=()=>dn=0;cv.onmousedown=st;cv.onmousemove=mv;cv.onmouseup=()=>dn=0;
+ $('clr').onclick=()=>{c.clearRect(0,0,cv.width,cv.height);beep()}}
+
+// ===== TEST: Easy / Medium / Hard =====
+function levels(){M.innerHTML=`<div class="pill" style="width:90%">${HI?'स्तर चुनें':'Choose Level'}</div>`;
+ [["Easy","आसान","#2e9e3e","⭐"],["Medium","मध्यम","#f9a825","⭐⭐"],["Hard","कठिन","#e53935","⭐⭐⭐"]].forEach(([e,h,c,s],i)=>{const b=document.createElement('button');b.className='opt';b.style.cssText='background:'+c+';padding:26px;margin:18px 0';b.innerHTML=`${s}<br>${HI?h:e}`;b.onclick=()=>{beep(800);quiz(i)};M.appendChild(b)})}
+const R=n=>Math.floor(Math.random()*n);
+function mk(lv){const t=R(3),O={'+':['plus','जमा'],'-':['minus','घटा'],'x':['times','गुणा']};let x,y,o='+',a,pic,qs,say_;
+ const eq=()=>{pic=`${x} ${o} ${y} = ?`;a=o=='+'?x+y:o=='-'?x-y:x*y;say_=sp(`${x} ${O[o][0]} ${y}?`,`${x} ${O[o][1]} ${y} कितना होगा?`)};
+ if(t==2||(lv==0&&t==1&&false)){const P=["Fruits","Vegetables","Animals","Birds","Vehicles","Sea Animals"].flatMap(k=>items(k)),it=P[R(P.length)];
+  pic=`<span style="font-size:90px">${it[2]}</span>`;a=it[HI?1:0];say_=sp('What is this?','यह क्या है?');
+  const ops=[a];while(ops.length<4){const n=P[R(P.length)][HI?1:0];if(!ops.includes(n))ops.push(n)}return{pic,a,ops:ops.sort(()=>Math.random()-.5),say:say_}}
+ if(lv==0){if(t==0){const n=1+R(9),e=["🍎","⭐","🐥","🎈","🚗"][R(5)];pic=`<span style="font-size:34px;word-break:break-all">${e.repeat(n)}</span>`;a=n;say_=sp('Count them','गिनिए कितने हैं?')}else{x=1+R(5);y=1+R(5);eq()}}
+ else if(lv==1){if(t==0){x=5+R(8);y=1+R(8);eq()}else{o='-';x=10+R(11);y=1+R(9);eq()}}
+ else{if(t==0){o='x';x=2+R(9);y=2+R(9);eq()}else if(R(2)){x=10+R(21);y=10+R(21);eq()}else{o='-';x=20+R(31);y=5+R(15);eq()}}
+ const ops=[a];while(ops.length<4){const n=a+R(9)-4;if(n>=0&&!ops.includes(n))ops.push(n)}return{pic,a,ops:ops.sort(()=>Math.random()-.5),say:say_}}
+function quiz(lv){let q=0,sc=0;const C=["#e53935","#3f51b5","#2e9e3e","#8e24aa"];
+ function next(){if(q==10){M.innerHTML=`<div class="pill" style="width:90%">${HI?'अंक':'Score'} ${sc}/10</div><div style="text-align:center;font-size:90px">${sc>=7?'🏆':'👍'}</div><div style="text-align:center"><button class="btn" id="ag">${HI?'फिर खेलें':'Play Again'}</button><button class="btn" style="background:#3f51b5" id="lv">${HI?'स्तर बदलें':'Change Level'}</button></div>`;say(sp(`Your score is ${sc} out of 10`,`आपके 10 में से ${sc} अंक हैं`));$('ag').onclick=()=>{q=0;sc=0;next()};$('lv').onclick=levels;return}
+  q++;const z=mk(lv);M.innerHTML=`<div class="pill" style="background:#a0f;color:#fff;width:100%;font-size:18px">${['Easy','Medium','Hard'][lv]} · ${HI?'सवाल':'Question'} ${q}/10</div><div class="pill" style="background:#555;color:#fff;width:100%;font-size:44px;min-height:110px;display:flex;align-items:center;justify-content:center">${z.pic}</div>`;
+  z.ops.forEach((x,i)=>{const b=document.createElement('button');b.className='opt';b.style.background=C[i];b.textContent=x;b.onclick=()=>{if(x==z.a){sc++;say(sp('Correct! Well done','सही! शाबाश'))}else say(sp('Oops! Answer is '+z.a,'ग़लत! सही जवाब '+z.a+' है'));setTimeout(next,1500)};M.appendChild(b)});say(z.say)}
+ next()}
+
+// ===== DRAWER / MENU =====
+function drawer(o){$('dr').classList.toggle('o',o);$('ov').style.display=o?'block':'none'}
+function toggleLang(){HI=!HI;try{localStorage.setItem('lang',HI?'hi':'en')}catch(e){}$('dl').textContent=HI?'हिंदी':'English';beep(900);show(cur)}
+function menu(k){drawer(0);const open=u=>window.open(u,'_blank');
+ if(k=='home')go('home');if(k=='lang')toggleLang();if(k=='update'||k=='rate')open(CFG.playLink);if(k=='other')open(CFG.devLink);if(k=='privacy')go('Privacy Policy');
+ if(k=='share'){const t=CFG.title+' - Kids Learning: '+CFG.playLink;navigator.share?navigator.share({text:t}):prompt('Copy & share:',t)}}
+$('dl').textContent=HI?'हिंदी':'English';
+window.onhashchange();
+</script></body></html>
