@@ -37,6 +37,15 @@ html,body{margin:0;height:100%;background:#00bcd4;color:#fff;font-family:system-
 #actions button{border:0;border-radius:12px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;color:#222;background:linear-gradient(90deg,#fff,#ffeb00)}
 #actions button.alt{background:rgba(0,0,0,.3);color:#fff}
 </style>
+<style>
+#pwaBar{position:fixed;left:50%;bottom:18px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:99999;display:flex;align-items:center;gap:12px;background:#fff;color:#222;border-radius:14px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.3);max-width:92vw;font:14px system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;transition:all .35s}
+#pwaBar.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#pwaBar img{width:34px;height:34px;border-radius:8px}
+#pwaBar span{flex:1;line-height:1.3}
+#pwaBar button{border:0;cursor:pointer}
+#pwaInstall{background:#d71c1c;color:#fff;font-weight:700;border-radius:10px;padding:9px 16px;font-size:14px}
+#pwaClose{background:none;font-size:20px;color:#777;padding:2px 6px}
+</style>
 </head>
 <body>
 <div id="ashSplash">
@@ -60,7 +69,7 @@ html,body{margin:0;height:100%;background:#00bcd4;color:#fff;font-family:system-
      redirect_link/enabled  -> true / false          (optional; false = show message instead)
      redirect_link/message  -> "text"                (optional; shown when enabled is false)
    (redirect_link can also be a plain string URL. Missing nodes are auto-created on first open.)
-   Any link in url opens directly in this WebView. If url is empty/missing/invalid or Firebase fails, the bundled Nursery App (nursery.html) opens.   Debug: /?stay=1 */
+   If url is empty, the bundled Nursery App (nursery.html) opens.   Debug: /?stay=1 */
 const FB_CONFIG = {
   apiKey: "AIzaSyCr1DsKYO2KR6rHLHRfSaMvqJYfCaagDvI",
   authDomain: "nursery-app-28b8c.firebaseapp.com",
@@ -79,17 +88,9 @@ let started = Date.now(), done = false;
 function say(html, err){ $('msg').innerHTML = html || ''; $('msg').style.visibility = err ? 'visible' : 'hidden'; $('bar').classList.toggle('stop', !!err); }
 function showActions(cached){ $('actions').style.display = 'flex'; $('cachedBtn').style.display = cached ? '' : 'none'; $('cachedBtn').onclick = () => go(cached); }
 
-const BUNDLED_URL = new URL(BUNDLED, location.href).href;
-function norm(u){                                   /* "example.com" -> "https://example.com" ; strips quotes/spaces */
-  u = String(u == null ? '' : u).trim().replace(/^["'`]+|["'`]+$/g, '').trim();
-  if (!u) return '';
-  if (/^\/\//.test(u)) return 'https:' + u;
-  if (/^[a-z][a-z0-9+.\-]*:/i.test(u)) return u;
-  if (/^[^\s\/?#]+\.[^\s\/?#]{2,}/.test(u) || /^localhost(:|\/|$)/i.test(u)) return 'https://' + u;
-  return u;
-}
 function safeUrl(u){
-  u = norm(u); if (!u) return null;
+  if (typeof u !== 'string') return null;
+  u = u.trim(); if (!u) return null;
   try{
     const x = new URL(u, location.href);
     if (!/^https?:$/.test(x.protocol)) return null;
@@ -97,13 +98,12 @@ function safeUrl(u){
     return x.href;
   }catch(e){ return null; }
 }
-function isExt(u){ try{ return new URL(u).origin !== location.origin; }catch(e){ return false; } }
 function cached(){ try{ return safeUrl(localStorage.getItem(LS_KEY)); }catch(e){ return null; } }
 function save(u){ try{ localStorage.setItem(LS_KEY, u); }catch(e){} }
 
 let mounted = false, curUrl = null;
 function hideSplash(){ const w = Math.max(0, MIN_SPLASH - (Date.now() - started)); setTimeout(() => $('ashSplash').classList.add('hide'), w); }
-function mount(url){                                /* same-site page (built-in app) -> shown inside the app */
+function mount(url){
   curUrl = url; mounted = true;
   let f = $('appFrame');
   if (!f){
@@ -119,21 +119,7 @@ function go(url){
   done = true;
   if (stay){ say('Link: <code>' + url.replace(/</g,'&lt;') + '</code><br>(stay mode)', true); return; }
   if (mounted && url === curUrl) return;
-  if (isExt(url)){                                  /* ANY other website: open it directly in this WebView (sites block iframes -> blank) */
-    if (navigator.onLine === false){ mount(BUNDLED_URL); return; }
-    curUrl = url; mounted = true;
-    const wait = Math.max(0, MIN_SPLASH - (Date.now() - started));
-    setTimeout(() => { try{ location.replace(url); }catch(e){ location.href = url; } }, wait);
-    return;
-  }
   mount(url);
-}
-function reach(url){                                /* true if the site answers at all (CORS ignored) */
-  return new Promise(res => {
-    let fin = false; const end = v => { if (!fin){ fin = true; res(v); } };
-    setTimeout(() => end(false), 6000);
-    try{ fetch(url, { mode: 'no-cors', cache: 'no-store' }).then(() => end(true), () => end(false)); }catch(e){ end(true); }
-  });
 }
 
 let ref = null, ensured = false;
@@ -146,23 +132,26 @@ function ensureNodes(v){
 }
 
 function handle(val){
-  try{ ensureNodes(val); }catch(e){}
+  ensureNodes(val);
   const o = (val && typeof val === 'object') ? val : { url: val };
-  if (o.enabled === false){ if (mounted && !isExt(curUrl || '')) unmount(); say(String(o.message || DEFAULTS.message).replace(/</g,'&lt;'), true); $('actions').style.display = 'none'; return; }
+  if (o.enabled === false){ if (mounted) unmount(); say(String(o.message || DEFAULTS.message).replace(/</g,'&lt;'), true); $('actions').style.display = 'none'; return; }
   say('');
-  const u = safeUrl(o.url || o.link), f = safeUrl(o.fallback);
-  if (!u){ go(BUNDLED_URL); return; }               /* no / empty / invalid link -> built-in app */
-  save(u);
-  if (!isExt(u)){ go(u); return; }
-  reach(u).then(ok => go(ok ? u : (f && f !== u ? f : BUNDLED_URL)));
+  const u = safeUrl(o.url) || safeUrl(BUNDLED);
+  if (safeUrl(o.url)) save(u);
+  const f = safeUrl(o.fallback);
+  if (!f || f === u){ go(u); return; }
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 4500);
+  fetch(u, { mode: 'no-cors', cache: 'no-store', signal: ctl.signal })
+    .then(() => { clearTimeout(t); go(u); })
+    .catch(() => { clearTimeout(t); go(f); });
 }
 
 function load(){
   done = false; started = Date.now(); $('actions').style.display = 'none'; say('');
   let first = true;
-  const timer = setTimeout(() => {                  /* Firebase slow / offline -> last link or built-in app */
+  const timer = setTimeout(() => {
     if (!first) return; first = false;
-    go(cached() || BUNDLED_URL);
+    go(cached() || safeUrl(BUNDLED));
   }, TIMEOUT);
   try{
     if (!firebase.apps.length){ firebase.initializeApp(FB_CONFIG); try{ firebase.analytics(); }catch(e){} }
@@ -170,19 +159,31 @@ function load(){
     ref = firebase.database().ref(DB_PATH);
     ref.on('value', s => {
       if (first){ first = false; clearTimeout(timer); }
-      let v = null; try{ v = s.val(); }catch(e){}
-      handle(v);
+      handle(s.val());
     }, err => {
       if (first){ first = false; clearTimeout(timer); }
       if (done) return;
-      go(cached() || BUNDLED_URL);
+      go(cached() || safeUrl(BUNDLED));
     });
-  }catch(e){ first = false; clearTimeout(timer); go(cached() || BUNDLED_URL); }
+  }catch(e){ first = false; clearTimeout(timer); go(cached() || safeUrl(BUNDLED)); }
 }
 
 $('retryBtn').onclick = load;
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-if (window.firebase) load(); else go(cached() || BUNDLED_URL);
+if (window.firebase) load(); else go(cached() || safeUrl(BUNDLED));
+</script>
+<div id="pwaBar"><img src="icon-192.png" alt=""><span>Install Nursery App as an app for quick access</span><button id="pwaInstall">Install</button><button id="pwaClose" aria-label="Close">&times;</button></div>
+<script>
+(function(){
+var dp=null,bar=document.getElementById('pwaBar');
+function hide(){bar.classList.remove('show')}
+var standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+try{if(sessionStorage.getItem('pwaDismiss'))standalone=true}catch(e){}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;if(!standalone)setTimeout(function(){bar.classList.add('show')},800)});
+document.getElementById('pwaInstall').onclick=function(){if(!dp)return;hide();dp.prompt();dp.userChoice.then(function(){dp=null})};
+document.getElementById('pwaClose').onclick=function(){hide();try{sessionStorage.setItem('pwaDismiss','1')}catch(e){}};
+window.addEventListener('appinstalled',function(){hide();dp=null});
+})();
 </script>
 </body>
 </html>

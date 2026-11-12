@@ -98,7 +98,7 @@ function pop(el){el.classList.add('pop');setTimeout(()=>el.classList.remove('pop
 const L={
 Fruits:"Apple|सेब|🍎;Banana|केला|🍌;Mango|आम|🥭;Orange|संतरा|🍊;Grapes|अंगूर|🍇;Watermelon|तरबूज़|🍉;Strawberry|स्ट्रॉबेरी|🍓;Pineapple|अनानास|🍍;Cherry|चेरी|🍒;Peach|आड़ू|🍑;Pear|नाशपाती|🍐;Lemon|नींबू|🍋;Coconut|नारियल|🥥;Kiwi|कीवी|🥝;Blueberries|ब्लूबेरी|🫐;Melon|खरबूजा|🍈",
 Vegetables:"Tomato|टमाटर|🍅;Potato|आलू|🥔;Carrot|गाजर|🥕;Onion|प्याज़|🧅;Garlic|लहसुन|🧄;Brinjal|बैंगन|🍆;Corn|मक्का|🌽;Cucumber|खीरा|🥒;Broccoli|ब्रोकली|🥦;Chili|मिर्च|🌶️;Peas|मटर|🫛;Mushroom|मशरूम|🍄;Cabbage|पत्तागोभी|🥬",
-Animals:"Lion|शेर|🦁;Cat|बिल्ली|🐱;Dog|कुत्ता|🐶;Elephant|हाथी|🐘;Horse|घोड़ा|🐴;Cow|गाय|🐄;Monkey|बंदर|🐒;Tiger|बाघ|🐯;Zebra|ज़ेबरा|🦓;Rabbit|खरगोश|🐰;Goat|बकरी|🐐;Sheep|भेड़|🐑;Camel|ऊँट|🐪;Giraffe|जिराफ़|🦒;Bear|भालू|🐻;Dinosaur|डायनाविस|🦖;Kangaroo|कंगारू|🦘;Pig|सूअर|🐷",
+Animals:"Lion|शेर|🦁;Cat|बिल्ली|🐱;Dog|कुत्ता|🐶;Elephant|हाथी|🐘;Horse|घोड़ा|🐴;Cow|गाय|🐄;Monkey|बंदर|🐒;Tiger|बाघ|🐯;Zebra|ज़ेबरा|🦓;Rabbit|खरगोश|🐰;Goat|बकरी|🐐;Sheep|भेड़|🐑;Camel|ऊँट|🐪;Giraffe|जिराफ़|🦒;Bear|भालू|🐻;Dinosaur|डायनासोर|🦖;Kangaroo|कंगारू|🦘;Pig|सूअर|🐷",
 Insects:"Bee|मधुमक्खी|🐝;Ant|चींटी|🐜;Butterfly|तितली|🦋;Ladybug|लेडीबग|🐞;Spider|मकड़ी|🕷️;Snail|घोंघा|🐌;Cockroach|कॉकरोच|🪳;Mosquito|मच्छर|🦟;Fly|मक्खी|🪰;Scorpion|बिच्छू|🦂;Worm|कीड़ा|🐛;Cricket|झींगुर|🦗;Lizard|छिपकली|🦎;Snake|साँप|🐍",
 Birds:"Parrot|तोता|🦜;Eagle|चील|🦅;Owl|उल्लू|🦉;Duck|बत्तख|🦆;Rooster|मुर्गा|🐓;Peacock|मोर|🦚;Penguin|पेंगुइन|🐧;Swan|हंस|🦢;Flamingo|फ्लेमिंगो|🦩;Dove|कबूतर|🕊️;Chick|चूज़ा|🐤;Crow|कौआ|🐦‍⬛;Turkey|टर्की|🦃",
 Vehicles:"Car|कार|🚗;Bus|बस|🚌;Train|रेलगाड़ी|🚆;Aeroplane|हवाई जहाज़|✈️;Ship|जहाज़|🚢;Bicycle|साइकिल|🚲;Motorbike|मोटरसाइकिल|🏍️;Truck|ट्रक|🚚;Helicopter|हेलीकॉप्टर|🚁;Rocket|रॉकेट|🚀;Tractor|ट्रैक्टर|🚜;Ambulance|एम्बुलेंस|🚑;Boat|नाव|⛵;Auto|ऑटो रिक्शा|🛺",
@@ -109,7 +109,7 @@ Colors:"Red|लाल|#f00;White|सफ़ेद|#fff;Black|काला|#000;Gr
 "Solar Systems":"Sun|सूर्य|🌞;Mercury|बुध|⚪;Venus|शुक्र|🟡;Earth|पृथ्वी|🌍;Mars|मंगल|🔴;Jupiter|बृहस्पति|🟠;Saturn|शनि|🪐;Uranus|अरुण|🔵;Neptune|वरुण|🔷;Pluto|प्लूटो|⚫;Moon|चाँद|🌙",
 "Flags and Continents":"India|भारत|🇮🇳;Pakistan|पाकिस्तान|🇵🇰;Oman|ओमान|🇴🇲;UAE|यूएई|🇦🇪;Saudi Arabia|सऊदी अरब|🇸🇦;Kuwait|कुवैत|🇰🇼;Bangladesh|बांग्लादेश|🇧🇩;Philippines|फ़िलीपींस|🇵🇭;America|अमेरिका|🇺🇸;China|चीन|🇨🇳;Asia|एशिया|🌏;Africa|अफ्रीका|🌍;Europe|यूरोप|🌍;North America|उत्तरी अमेरिका|🌎;South America|दक्षिण अमेरिका|🌎;Australia|ऑस्ट्रेलिया|🦘;Antarctica|अंटार्कटिका|🧊"};
 const AL="A|Apple|सेब|🍎;B|Ball|गेंद|⚽;C|Cat|बिल्ली|🐱;D|Dog|कुत्ता|🐶;E|Elephant|हाथी|🐘;F|Fish|मछली|🐟;G|Grapes|अंगूर|🍇;H|Horse|घोड़ा|🐴;I|Ice cream|आइसक्रीम|🍦;J|Joker|जोकर|🤡;K|Kite|पतंग|🪁;L|Lion|शेर|🦁;M|Monkey|बंदर|🐵;N|Nest|घोंसला|🪺;O|Orange|संतरा|🍊;P|Parrot|तोता|🦜;Q|Queen|रानी|👸;R|Rabbit|खरगोश|🐰;S|Sun|सूरज|☀️;T|Tiger|बाघ|🐯;U|Umbrella|छाता|☂️;V|Van|वैन|🚐;W|Watch|घड़ी|⌚;X|X-ray|एक्स-रे|🩻;Y|Yak|याक|🐂;Z|Zebra|ज़ेबरा|🦓";
-const VM="अ|अनार|Anaar|🍎;आ|आम|Aam|🥭;इ|इमली|Imli|🫘;उ|उल्लू|Ullu|🦉;ऊ|ऊँट|Oont|🐪;ए|एक|Ek|1️⃣;क|कबूतर|Kabootar|🕊️;ख|खरगोश|Khargosh|🐰;ग|गमला|Gamla|🪴;घ|घड़ी|Ghadi|⌚;च|चम्मच|Chammach|🥄;छ|छतरी|Chhatri|☂️;ज|जहाज़|Jahaaz|🚢;झ|झंडा|Jhanda|🚩;ट|टमाटर|Tamatar|🍅;त|तरबूज़|Tarbooz|🍉;ध|धनुष|Dhanush|🏹;न|नल|Nal|𚚰;प|पतंग|Patang|🪁;ब|बत्तख|Batakh|🦆;भ|भालू|Bhaalu|🐻;म|मछली|Machhli|🐟;व|वायुयान|Vayuyan|✈️;श|शेर|Sher|🦁;स|सेब|Seb|🍎;ह|हाथी|Haathi|🐘";
+const VM="अ|अनार|Anaar|🍎;आ|आम|Aam|🥭;इ|इमली|Imli|🫘;उ|उल्लू|Ullu|🦉;ऊ|ऊँट|Oont|🐪;ए|एक|Ek|1️⃣;क|कबूतर|Kabootar|🕊️;ख|खरगोश|Khargosh|🐰;ग|गमला|Gamla|🪴;घ|घड़ी|Ghadi|⌚;च|चम्मच|Chammach|🥄;छ|छतरी|Chhatri|☂️;ज|जहाज़|Jahaaz|🚢;झ|झंडा|Jhanda|🚩;ट|टमाटर|Tamatar|🍅;त|तरबूज़|Tarbooz|🍉;ध|धनुष|Dhanush|🏹;न|नल|Nal|🚰;प|पतंग|Patang|🪁;ब|बत्तख|Batakh|🦆;भ|भालू|Bhaalu|🐻;म|मछली|Machhli|🐟;व|वायुयान|Vayuyan|✈️;श|शेर|Sher|🦁;स|सेब|Seb|🍎;ह|हाथी|Haathi|🐘";
 const W="Zero One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen Twenty".split(" ");
 const H="शून्य एक दो तीन चार पाँच छह सात आठ नौ दस ग्यारह बारह तेरह चौदह पंद्रह सोलह सत्रह अठारह उन्नीस बीस".split(" ");
 const DAYS="Sunday रविवार,Monday सोमवार,Tuesday मंगलवार,Wednesday बुधवार,Thursday गुरुवार,Friday शुक्रवार,Saturday शनिवार".split(",");
@@ -121,8 +121,7 @@ const TT={};HOME.forEach(h=>TT[h[0]]=h[1]);
 // ===== VIEWS =====
 const M=$('main');let cur='home';
 function go(n){location.hash=encodeURIComponent(n)}
-function initHash(){show(decodeURIComponent(location.hash.slice(1))||'home')}
-window.onhashchange=initHash;
+window.onhashchange=()=>show(decodeURIComponent(location.hash.slice(1))||'home');
 function card(pic,en,hi,segs,cls){const d=document.createElement('div');d.className='card';
  const a=HI?hi:en,b=HI?en:hi;
  d.innerHTML=`<div class="in"><div class="pic ${cls||''}">${pic}</div><div class="t">${a}${b&&b!=a?`<i>${b}</i>`:''}</div></div>`;
@@ -179,5 +178,5 @@ function menu(k){drawer(0);const open=u=>window.open(u,'_blank');
  if(k=='home')go('home');if(k=='lang')toggleLang();if(k=='update'||k=='rate')open(CFG.playLink);if(k=='other')open(CFG.devLink);if(k=='privacy')go('Privacy Policy');
  if(k=='share'){const t=CFG.title+' - Kids Learning: '+CFG.playLink;navigator.share?navigator.share({text:t}):prompt('Copy & share:',t)}}
 $('dl').textContent=HI?'हिंदी':'English';
-initHash();
+window.onhashchange();
 </script></body></html>
